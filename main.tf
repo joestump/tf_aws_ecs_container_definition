@@ -42,7 +42,7 @@ data "template_file" "port_mappings" {
 $${join(",\n",
   compact(
     list(
-    hostPort == "" ? "" : "$${jsonencode("hostPort") }: $${host_port}",
+    host_port == "" ? "" : "$${jsonencode("hostPort") }: $${host_port}",
     "$${jsonencode("containerPort")}: $${container_port}",
     protocol == "" ? "" : "$${jsonencode("protocol")}: $${jsonencode(protocol)}"
     )
@@ -51,12 +51,12 @@ $${join(",\n",
 JSON
 
   vars {
-    host_port = "${lookup(var.port_mappings[count.index], "hostPort", "")}"
+    host_port = "${lookup(var.port_mappings[count.index], "host_port", "")}"
+    protocol  = "${lookup(var.port_mappings[count.index], "protocol", "tcp")}"
 
     # Use lookup here without defaults so that TF will raise an error on 
     # fields that are required.
-    container_port = "${lookup(var.port_mappings[count.index], "containerPort")}"
-    protocol       = "${lookup(var.port_mappings[count.index], "protocol", "")}"
+    container_port = "${lookup(var.port_mappings[count.index], "container_port")}"
   }
 }
 
@@ -73,10 +73,9 @@ JSON
 
   vars {
     logs_group = "${vars.logs_group}"
-    region = "${vars.region}"
+    region     = "${vars.region}"
   }
 }
-
 
 data "template_file" "container_definition" {
   template = <<JSON

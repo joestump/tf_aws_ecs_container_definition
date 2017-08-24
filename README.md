@@ -8,28 +8,47 @@ This module currently supports Terraform 0.10.x, but does not require it.
 Module Input Variables
 ----------------------
 
+**NOTE:** Not all [container definition parameters](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#standard_container_definition_params) are currently support. 
+
 #### Required
 
-- `name` - ECS task name.
-- `image` - The Docker container image to use.
-- `command` - The command that is passed to the container.
+- `name` - _(String)_ ECS task name.
+- `image` - _(String)_ The Docker container image to use.
+- `command` - _(String)_ The command that is passed to the container.
 
 #### Optional
 
 - `essential` - _(Boolean)_ Whether the task is essential. Default is `true`.
+- `links` - _(List)_ A list of other containers to link this task to. Allows containers to communicate with each other without the need for port mappings. 
+- `cpu` - _(Integer)_ The number of CPU units to reserve for the task container.
+- `memory` - _(Integer)_ The hard limit (in MiB) of memory to present to the container.
+- `port_mappings` - _(List)_ A list of port mappings. Each entry should be a map that defines `container_port` as well as optionally definining `protocol` (defaults to `tcp`) and `host_port`.
 
 Usage
 -----
 
 ```hcl
-module "ecs-cluster" {
-  source    = "github.com/terraform-community-modules/tf_aws_ecs"
-  name      = "infra-services"
-  servers   = 1
-  subnet_id = ["subnet-6e101446"]
-  vpc_id    = "vpc-99e73dfc"
+module "ecs_task_definition" {
+  source  = "github.com/joestump/tf_aws_ecs_container_definition"
+  name    = "my-task"
+  image   = "quay.io/carmera/my-task:latest"
+  command = ["/usr/bin", "python", "--help"]
+  environment = [
+    {
+      name = MY_API_KEY
+      value = "${vars.MY_API_KEY}"
+    },
+    {
+      name = AWS_DEFAULT_REGION
+      value = "${vars.region}"
+    }
+  ]
 }
 
+resource "aws_ecs_task_definition" "service" {
+  family                = "my-task"
+  container_definitions = "${module.ecs_task_definition.container_definition}"
+}
 ```
 
 Outputs
