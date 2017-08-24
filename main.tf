@@ -15,6 +15,16 @@ data "template_file" "command" {
   }
 }
 
+data "template_file" "entry_point" {
+  count    = "${length(var.entry_point)}"
+  template = "$${jsonencode(entry_point_part)}"
+
+  vars {
+    entry_point_part = "${element(var.entry_point, count.index)}"
+  }
+}
+
+
 data "template_file" "environment" {
   count = "${length(var.environment)}"
 
@@ -65,15 +75,15 @@ data "template_file" "log_configuration" {
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {
-      "awslogs-group": "${logs_group}",
-      "awslogs-region": "${region}"
+      "awslogs-group": "$${logs_group}",
+      "awslogs-region": "$${region}"
     }
   }
 JSON
 
   vars {
-    logs_group = "${vars.logs_group}"
-    region     = "${vars.region}"
+    logs_group = "${var.logs_group}"
+    region     = "${var.region}"
   }
 }
 
@@ -88,9 +98,11 @@ JSON
     val = "${join(",\n  ",
       compact(list(
         "${jsonencode("name")}: ${jsonencode(var.name)}",
-        "${jsonencode("command")}: [${join(", ", data.template_file.command.*.rendered)}]",
+        "${length(var.command) > 0 ? "${jsonencode("command")}: [${join(", ", data.template_file.command.*.rendered)}]" : ""}",
+        "${length(var.entry_point) > 0 ? "${jsonencode("entry_point")}: [${join(", ", data.template_file.entry_point.*.rendered)}]" : ""}",
         "${var.cpu != "" ? "${jsonencode("cpu")}: ${var.cpu}" : "" }",
         "${var.memory != "" ? "${jsonencode("memory")}: ${var.memory}" : "" }",
+        "${var.logs_group != "" && var.region != "" ? "${data.template_file.log_configuration.rendered}" : "" }",
         "${jsonencode("image")}: ${jsonencode(var.image)}",
         "${length(var.links) > 0 ? "${jsonencode("links")}: ${jsonencode(var.links)}" : ""}",
         "${length(var.port_mappings) > 0 ?  join(",\n", data.template_file.port_mappings.*.rendered) : ""}",

@@ -14,15 +14,17 @@ Module Input Variables
 
 - `name` - _(String)_ ECS task name.
 - `image` - _(String)_ The Docker container image to use.
-- `command` - _(String)_ The command that is passed to the container.
 
 #### Optional
 
+- `command` - _(List)_ The command that is passed to the container.
+- `entry_point` - _(List)_ The command that is passed to the container.
 - `essential` - _(Boolean)_ Whether the task is essential. Default is `true`.
 - `links` - _(List)_ A list of other containers to link this task to. Allows containers to communicate with each other without the need for port mappings. 
 - `cpu` - _(Integer)_ The number of CPU units to reserve for the task container.
 - `memory` - _(Integer)_ The hard limit (in MiB) of memory to present to the container.
 - `port_mappings` - _(List)_ A list of port mappings. Each entry should be a map that defines `container_port` as well as optionally definining `protocol` (defaults to `tcp`) and `host_port`.
+- `environment` - _(List)_ A list of environment variables. Each entry must be a map that defines `name` and `value`.
 
 Usage
 -----

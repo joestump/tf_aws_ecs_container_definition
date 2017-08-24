@@ -1,12 +1,26 @@
 variable "name" {}
 variable "image" {}
 
+variable "region" {
+  default = ""
+}
+
+variable "logs_group" {
+  default = ""
+}
+
 variable "essential" {
   default = true
 }
 
 variable "command" {
   type = "list"
+  default = []
+}
+
+variable "entry_point" {
+  type = "list"
+  default = []
 }
 
 variable "links" {
