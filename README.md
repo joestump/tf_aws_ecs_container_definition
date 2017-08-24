@@ -29,6 +29,8 @@ Module Input Variables
 Usage
 -----
 
+#### A Single Task Definition
+
 ```hcl
 module "ecs_task_definition" {
   source  = "github.com/joestump/tf_aws_ecs_container_definition"
@@ -49,14 +51,57 @@ module "ecs_task_definition" {
 
 resource "aws_ecs_task_definition" "service" {
   family                = "my-task"
-  container_definitions = "${module.ecs_task_definition.container_definition}"
+
+  # Remember that the module just exports a hash, but this argument requires a JSON list.
+  container_definitions = "[${module.ecs_task_definition.container_definition}]"
+}
+```
+
+#### Multiple Task Definitions
+
+```hcl
+module "my_task_definition" {
+  source  = "github.com/joestump/tf_aws_ecs_container_definition"
+  name    = "my-task"
+  image   = "quay.io/carmera/my-task:latest"
+  command = ["/usr/bin", "python", "--help"]
+  environment = [
+    {
+      name = MY_API_KEY
+      value = "${vars.MY_API_KEY}"
+    },
+    {
+      name = AWS_DEFAULT_REGION
+      value = "${vars.region}"
+    }
+  ]
+}
+
+module "some_other_task_definition" {
+  source  = "github.com/joestump/tf_aws_ecs_container_definition"
+  name    = "some-other-task"
+  image   = "quay.io/carmera/some-other-task:latest"
+  command = ["/usr/bin", "ruby", "--help"]
+  environment = [
+    {
+      name = MY_TASK_API_KEY
+      value = "${vars.my_task_api_key}"
+    }
+  ]
+}
+
+resource "aws_ecs_task_definition" "service" {
+  family                = "my-task"
+
+  # We need to use a bit of TF interpolation to pass multiple container definitions.
+  container_definitions = "[${join(",\n", list(module.my_task_definition.container_definition, module.some_other_task_definition.container_definition))}]"
 }
 ```
 
 Outputs
 =======
 
-- `container_definition` - _(String)_ JSON string of the container definition.
+- `container_definition` - _(String)_ JSON string of the container definition. **NOTE:** This module outputs the JSON hash of the definition, while the `container_definitions` argument expects a JSON list. See the usage section above for more.
 
 Authors
 =======
