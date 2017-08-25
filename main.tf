@@ -32,8 +32,8 @@ data "template_file" "environment" {
 $${join(",\n",
   compact(
     list(
-    "$${jsonencode("name")}: $${name}",
-    "$${jsonencode("value")}: $${value}",
+    "$${jsonencode("name")}: $${jsonencode(name)}",
+    "$${jsonencode("value")}: $${jsonencode(value)}",
     )
   )
 )}
@@ -105,8 +105,8 @@ JSON
         "${var.logs_group != "" && var.region != "" ? "${data.template_file.log_configuration.rendered}" : "" }",
         "${jsonencode("image")}: ${jsonencode(var.image)}",
         "${length(var.links) > 0 ? "${jsonencode("links")}: ${jsonencode(var.links)}" : ""}",
-        "${length(var.port_mappings) > 0 ?  join(",\n", data.template_file.port_mappings.*.rendered) : ""}",
-        "${length(var.environment) > 0 ?  join(",\n", data.template_file.environment.*.rendered) : ""}",
+        "${length(var.port_mappings) > 0 ? "${jsonencode("portMappings")}: ${join(",\n", data.template_file.port_mappings.*.rendered)}" : ""}",
+        "${length(var.environment) > 0 ? "${jsonencode("environment")}: ${join(",\n", data.template_file.environment.*.rendered)}" : ""}",
         "${var.essential != "" ? data.template_file.essential.rendered : ""}"
       ))
     )}"
