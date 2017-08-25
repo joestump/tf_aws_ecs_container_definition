@@ -28,16 +28,14 @@ data "template_file" "entry_point" {
 data "template_file" "environment" {
   count = "${length(var.environment)}"
 
-  template = <<JSON
-$${join(",\n",
+  template = "{\n     $${join(",\n     ",
   compact(
     list(
     "$${jsonencode("name")}: $${jsonencode(name)}",
     "$${jsonencode("value")}: $${jsonencode(value)}",
     )
   )
-)}
-JSON
+)}\n    }"
 
   vars {
     name  = "${lookup(var.environment[count.index], "name", "")}"
@@ -49,7 +47,7 @@ data "template_file" "port_mappings" {
   count = "${length(var.port_mappings)}"
 
   template = <<JSON
-$${join(",\n",
+{$${join(",\n",
   compact(
     list(
     host_port == "" ? "" : "$${jsonencode("hostPort") }: $${host_port}",
@@ -57,7 +55,7 @@ $${join(",\n",
     protocol == "" ? "" : "$${jsonencode("protocol")}: $${jsonencode(protocol)}"
     )
   )
-)}
+)}}
 JSON
 
   vars {
@@ -72,7 +70,7 @@ JSON
 
 data "template_file" "log_configuration" {
   template = <<JSON
-  "logConfiguration": {
+"logConfiguration": {
     "logDriver": "awslogs",
     "options": {
       "awslogs-group": "$${logs_group}",
@@ -102,11 +100,11 @@ JSON
         "${length(var.entry_point) > 0 ? "${jsonencode("entry_point")}: [${join(", ", data.template_file.entry_point.*.rendered)}]" : ""}",
         "${var.cpu != "" ? "${jsonencode("cpu")}: ${var.cpu}" : "" }",
         "${var.memory != "" ? "${jsonencode("memory")}: ${var.memory}" : "" }",
-        "${var.logs_group != "" && var.region != "" ? "${data.template_file.log_configuration.rendered}" : "" }",
+        "${var.logs_group != "" && var.region != "" ? "${trimspace(data.template_file.log_configuration.rendered)}" : "" }",
         "${jsonencode("image")}: ${jsonencode(var.image)}",
         "${length(var.links) > 0 ? "${jsonencode("links")}: ${jsonencode(var.links)}" : ""}",
-        "${length(var.port_mappings) > 0 ? "${jsonencode("portMappings")}: ${join(",\n", data.template_file.port_mappings.*.rendered)}" : ""}",
-        "${length(var.environment) > 0 ? "${jsonencode("environment")}: ${join(",\n", data.template_file.environment.*.rendered)}" : ""}",
+        "${length(var.port_mappings) > 0 ? "${jsonencode("portMappings")}: [${join(",\n", data.template_file.port_mappings.*.rendered)}]" : ""}",
+        "${length(var.environment) > 0 ? "${jsonencode("environment")}: [\n    ${join(",\n    ", data.template_file.environment.*.rendered)}\n  ]" : ""}",
         "${var.essential != "" ? data.template_file.essential.rendered : ""}"
       ))
     )}"
