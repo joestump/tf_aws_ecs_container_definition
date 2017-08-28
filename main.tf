@@ -74,14 +74,16 @@ data "template_file" "log_configuration" {
     "logDriver": "awslogs",
     "options": {
       "awslogs-group": "$${logs_group}",
-      "awslogs-region": "$${region}"
+      "awslogs-region": "$${region}",
+      "awslogs-stream-prefix": "$${logs_prefix}"
     }
   }
 JSON
 
   vars {
-    logs_group = "${var.logs_group}"
-    region     = "${var.region}"
+    logs_group  = "${var.logs_group}"
+    logs_prefix = "${var.logs_prefix}"
+    region      = "${var.region}"
   }
 }
 

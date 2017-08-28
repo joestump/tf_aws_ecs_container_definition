@@ -9,6 +9,10 @@ variable "logs_group" {
   default = ""
 }
 
+variable "logs_prefix" {
+  default = ""
+}
+
 variable "essential" {
   default = true
 }

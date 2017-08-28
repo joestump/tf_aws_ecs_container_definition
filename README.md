@@ -25,6 +25,9 @@ Module Input Variables
 - `memory` - _(Integer)_ The hard limit (in MiB) of memory to present to the container.
 - `port_mappings` - _(List)_ A list of port mappings. Each entry should be a map that defines `container_port` as well as optionally definining `protocol` (defaults to `tcp`) and `host_port`.
 - `environment` - _(List)_ A list of environment variables. Each entry must be a map that defines `name` and `value`.
+- `logs_group` - _(String)_ The CloudWatch Logs group to send logs to.
+- `logs_prefix` - _(String)_ The stream prefix to use in CloudWatch Logs.
+- `region` - _(String)_ The region for CloudWatch Logs.
 
 Usage
 -----
