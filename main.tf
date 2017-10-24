@@ -106,7 +106,7 @@ JSON
         "${jsonencode("image")}: ${jsonencode(var.image)}",
         "${length(var.links) > 0 ? "${jsonencode("links")}: ${jsonencode(var.links)}" : ""}",
         "${length(var.port_mappings) > 0 ? "${jsonencode("portMappings")}: [${join(",\n", data.template_file.port_mappings.*.rendered)}]" : ""}",
-        "${length(var.environment) > 0 ? "${jsonencode("environment")}: [\n    ${join(",\n    ", data.template_file.environment.*.rendered)}\n  ]" : ""}",
+        "${length(var.environment) > 0 ? "${jsonencode("environment")}: [\n    ${join(",\n    ", data.template_file.environment.*.rendered)}${var.environment_extra != "" : ",\n${var.environment_extra}" : ""}\n  ]" : ""}",
         "${var.essential != "" ? data.template_file.essential.rendered : ""}"
       ))
     )}"

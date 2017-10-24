@@ -49,3 +49,8 @@ variable "environment" {
   type = "list"
   default = []
 }
+
+variable "environment_extra" {
+  description = "A string that will be appended to the environment. Allows for computed values to be passed in."
+  default = ""
+}
