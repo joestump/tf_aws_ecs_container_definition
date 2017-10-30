@@ -75,8 +75,8 @@ data "template_file" "mount_points" {
 {$${join(",\n",
   compact(
     list(
-    "$${jsonencode("sourceVolume")}: $${source_volume}",
-    "$${jsonencode("containerPath")}: $${container_path}",
+    "$${jsonencode("sourceVolume")}: $${jsonencode(source_volume)}",
+    "$${jsonencode("containerPath")}: $${jsonencode(container_path)}",
     read_only == "" ? "" : "$${jsonencode("read_only")}: $${jsonencode(read_only)}"
     )
   )
