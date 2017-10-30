@@ -45,6 +45,11 @@ variable "port_mappings" {
   default = []
 }
 
+variable "mount_points" {
+  type = "list"
+  default = []
+}
+
 variable "environment" {
   type = "list"
   default = []
