@@ -68,6 +68,31 @@ JSON
   }
 }
 
+data "template_file" "mount_points" {
+  count = "${length(var.mount_points)}"
+
+  template = <<JSON
+{$${join(",\n",
+  compact(
+    list(
+    "$${jsonencode("sourceVolume")}: $${jsonencode(source_volume)}",
+    "$${jsonencode("containerPath")}: $${jsonencode(container_path)}",
+    read_only == "" ? "" : "$${jsonencode("read_only")}: $${jsonencode(read_only)}"
+    )
+  )
+)}}
+JSON
+
+  vars {
+    read_only = "${lookup(var.mount_points[count.index], "read_only", false)}"
+
+    # Use lookup here without defaults so that TF will raise an error on 
+    # fields that are required.
+    source_volume = "${lookup(var.mount_points[count.index], "source_volume")}"
+    container_path = "${lookup(var.mount_points[count.index], "container_path")}"
+  }
+}
+
 data "template_file" "log_configuration" {
   template = <<JSON
 "logConfiguration": {
@@ -106,6 +131,7 @@ JSON
         "${jsonencode("image")}: ${jsonencode(var.image)}",
         "${length(var.links) > 0 ? "${jsonencode("links")}: ${jsonencode(var.links)}" : ""}",
         "${length(var.port_mappings) > 0 ? "${jsonencode("portMappings")}: [${join(",\n", data.template_file.port_mappings.*.rendered)}]" : ""}",
+        "${length(var.mount_points) > 0 ? "${jsonencode("mountPoints")}: [${join(",\n", data.template_file.mount_points.*.rendered)}]" : ""}",
         "${length(var.environment) > 0 ? "${jsonencode("environment")}: [\n    ${join(",\n    ", data.template_file.environment.*.rendered)}${var.environment_extra != "" ? ",\n${var.environment_extra}" : ""}\n  ]" : ""}",
         "${var.essential != "" ? data.template_file.essential.rendered : ""}"
       ))
